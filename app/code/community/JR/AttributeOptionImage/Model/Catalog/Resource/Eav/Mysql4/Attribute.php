@@ -5,6 +5,7 @@ class JR_AttributeOptionImage_Model_Catalog_Resource_Eav_Mysql4_Attribute extend
     protected function _saveOption(Mage_Core_Model_Abstract $object)
     {
         $option = $object->getOption();
+	
         if (is_array($option)) {
             $write = $this->_getWriteAdapter();
             $optionTable        = $this->getTable('attribute_option');
@@ -19,10 +20,12 @@ class JR_AttributeOptionImage_Model_Catalog_Resource_Eav_Mysql4_Attribute extend
                 if (!is_array($object->getDefault())) {
                     $object->setDefault(array());
                 }
-
+		
                 foreach ($option['value'] as $optionId => $values) {
-                    $intOptionId = (int) $optionId;
-                    if (!empty($option['delete'][$optionId])) {
+
+                    $intOptionId = (int)$optionId; // preg_replace( "/[^0-9 ]/i", "", $optionId);
+                   
+		 if (!empty($option['delete'][$intOptionId])) {
                         if ($intOptionId) {
                             $condition = $write->quoteInto('option_id=?', $intOptionId);
                             $write->delete($optionTable, $condition);
@@ -30,8 +33,7 @@ class JR_AttributeOptionImage_Model_Catalog_Resource_Eav_Mysql4_Attribute extend
 
                         continue;
                     }
-
-                    if (!$intOptionId) {
+                   if (!$intOptionId) {
                         $data = array(
                            'attribute_id'  => $object->getId(),
                            'sort_order'    => isset($option['order'][$optionId]) ? $option['order'][$optionId] : 0,
@@ -44,9 +46,10 @@ class JR_AttributeOptionImage_Model_Catalog_Resource_Eav_Mysql4_Attribute extend
                     else {
                         $data = array(
                            'sort_order'    => isset($option['order'][$optionId]) ? $option['order'][$optionId] : 0,
-                           'image'         => isset($option['image'][$optionId]) ? $option['image'][$optionId] : '',
-                           'thumb'         => isset($option['thumb'][$optionId]) ? $option['thumb'][$optionId] : '',
+                           'image'         => isset($option['image']['option_'.$optionId]) ? $option['image']['option_'.$optionId] : '',
+                           'thumb'         => isset($option['thumb']['option_'.$optionId]) ? $option['thumb']['option_'.$optionId] : '',
                         );
+			
                         $write->update($optionTable, $data, $write->quoteInto('option_id=?', $intOptionId));
                     }
 
